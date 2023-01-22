@@ -14,42 +14,42 @@ def checkFile():
     iplist = []
     with open(args.file, "rb") as file:
         data = file.read()
-        decoded_data = data.decode('utf-8', 'ignore')
-        # for line in decoded_data:
+        # .txt files are encoded in uft-8, with this we need to read in as bytes and decode.
+        decoded_data = data.decode('utf-8', 'ignore') 
+        # This will not read in as each line, so we need splitlines with this.
         for line in decoded_data.splitlines():
             isIP = re.search("^IP Address: (?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$", line)
             if isIP:
-                iplist.append(line.split(" ")[2].rstrip())
+                # This will grab the IP address only, as the regex will match the line including "IP Address: "
+                iplist.append(line.split(" ")[2].rstrip()) 
     iplist = set(iplist) # Turning the list into a set to only allow for unique instances of IP adddresses
-    # return iplist
+    # Return iplist
     whoisInfo(iplist)
 
 def whoisInfo(iplist):
+    print('\n===== Whois Information =====\n')
     for ip in iplist:
         try:
-            # print('\n===== Whois Information =====\n')
-            # print("IP address: " + ip)
+            print("IP address: " + ip)
             info = whois.whois(ip)
             if info.registrar: # Does this to check if the IP is local
-                knownAddresses.extend([ip, info.domain, info.registrar]) # extends list to add original ip, and registrar of IP
+                knownAddresses.extend([ip, info.org, info.registrar]) # extends list to add original ip, org, and registrar of IP
         except whois.parser.PywhoisError: 
             print(f'No match for "{ip}"')
-    print(knownAddresses)
 
 def printOutput():
-    with open("output.txt", "w") as outputFile:
+    # Grab the original text file intput by the user, then append _list.txt to it
+    with open(str(args.file.split(".")[0]) + "_list.txt", "w") as outputFile:
         for i, item in enumerate(knownAddresses):
             if i % 3 == 2:
                 outputFile.write(f"{item}\n")
             else:
                 outputFile.write(f"{item} - ")
-
-
+    print("\nOutput file: " + str(args.file.split(".")[0] + "_list.txt"))
 
 def main():
     checkFile()
     printOutput()
-
 
 if __name__ == "__main__":
     main()
