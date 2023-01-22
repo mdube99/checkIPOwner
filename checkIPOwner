@@ -1,0 +1,53 @@
+#!/usr/bin/python3
+
+import whois
+import re
+import argparse
+
+parser = argparse.ArgumentParser()
+parser.add_argument('-F', '--file', required=True, help='File containing IP addresses you would like to check for ownership')
+args = parser.parse_args()
+
+knownAddresses = []
+
+def checkFile():
+    iplist = []
+    with open(args.file, "r") as file:
+        for line in file:
+            isIP = re.search("^(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$", line)
+            if isIP:
+                iplist.append(line.rstrip())
+    iplist = set(iplist) # Turning the list into a set to only allow for unique instances of IP adddresses
+    # return iplist
+    whoisInfo(iplist)
+
+def whoisInfo(iplist):
+    for ip in iplist:
+        try:
+            print('\n===== Whois Information =====\n')
+            print("IP address: " + ip)
+            info = whois.whois(ip)
+            print(info)
+            if info.registrar: # Does this to check if the IP is local
+                knownAddresses.extend([ip, info.domain, info.registrar]) # extends list to add original ip, and registrar of IP
+        except whois.parser.PywhoisError: 
+            print(f'No match for "{ip}"')
+    print(knownAddresses)
+
+def printOutput():
+    with open("output.txt", "w") as outputFile:
+        for i, item in enumerate(knownAddresses):
+            if i % 3 == 2:
+                outputFile.write(f"{item}\n")
+            else:
+                outputFile.write(f"{item} - ")
+
+
+
+def main():
+    checkFile()
+    printOutput()
+
+
+if __name__ == "__main__":
+    main()
