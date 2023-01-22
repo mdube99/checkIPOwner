@@ -20,7 +20,7 @@ def checkFile():
             isIP = re.search("^IP Address: (?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$", line)
             if isIP:
                 # This will grab the IP address only, as the regex will match the line including "IP Address: "
-                iplist.append(line.split(" ")[2].rstrip()) 
+                iplist.append(line.split(" ")[2].rstrip()) # Strips off new line characters with rstrip()
     iplist = set(iplist) # Turning the list into a set to only allow for unique instances of IP addresses
     # Return iplist
     whoisInfo(iplist)
@@ -31,7 +31,8 @@ def whoisInfo(iplist):
         try:
             print("IP address: " + ip)
             info = whois.whois(ip)
-            if info.registrar: # Does this to check if the IP is local
+            if info.registrar: # Checks if IP address is local only, won't add to the list if it is
+                # Change the following line if you want different output in the file. e.g. change "info.org" to "info.domain"
                 knownAddresses.extend([ip, info.org, info.registrar]) # extends list to add original ip, org, and registrar of IP
         except whois.parser.PywhoisError: 
             print(f'No match for "{ip}"')
