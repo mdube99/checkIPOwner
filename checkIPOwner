@@ -21,7 +21,7 @@ def checkFile():
             if isIP:
                 # This will grab the IP address only, as the regex will match the line including "IP Address: "
                 iplist.append(line.split(" ")[2].rstrip()) 
-    iplist = set(iplist) # Turning the list into a set to only allow for unique instances of IP adddresses
+    iplist = set(iplist) # Turning the list into a set to only allow for unique instances of IP addresses
     # Return iplist
     whoisInfo(iplist)
 
