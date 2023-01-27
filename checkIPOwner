@@ -8,6 +8,7 @@ parser.add_argument('-F', '--file', required=True, help='File containing IP addr
 args = parser.parse_args()
 
 knownAddresses = []
+noWhoISMatch = []
 
 def checkFile():
     iplist = []
@@ -36,6 +37,7 @@ def whoisInfo(iplist):
                 knownAddresses.extend([ip, info.org, info.registrar]) # extends list to add original ip, org, and registrar of IP
         except whois.parser.PywhoisError: 
             print(f'No match for "{ip}"')
+            noWhoISMatch.extend([ip])
 
 def printOutput():
     # Grab the original text file intput by the user, then append _list.txt to it
@@ -45,7 +47,14 @@ def printOutput():
                 outputFile.write(f"{item}\n")
             else:
                 outputFile.write(f"{item} - ")
-    print("\nOutput file: " + str(args.file.split(".")[0] + "_list.txt"))
+    print("----------")
+    print("\n[+] Output file: " + str(args.file.split(".")[0] + "_list.txt"))
+
+    if noWhoISMatch:
+        with open(str(args.file.split(".")[0]) + "no_match.txt", "w") as noMatchFile:
+            for item in enumerate(noWhoISMatch):
+                noMatchFile.write(f"{item}\n")
+        print("[+] All IP Addresses that did not contain WhoIS match were output to: " + str(args.file.split(".")[0] + "_no_match.txt"))
 
 def main():
     checkFile()
